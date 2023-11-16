@@ -27,7 +27,7 @@ class UserClass extends React.Component {
     render () {
 
         const { count } = this.state;
-        const {name} = this.state.userInfo.name;
+      
         return (
             <div className="user-card">
                 <h2>Name :{name}</h2>

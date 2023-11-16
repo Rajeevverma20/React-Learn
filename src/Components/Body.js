@@ -2,38 +2,22 @@ import RestaurantCard from "./RestaurantCard";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Shimmer from "./Shimmer";
-
+import useOnlineStatus from "../utils/useOnlineStatus";
+import useBody from "../utils/useBody";
 
 const Body = () => {
-  const [listOfRestaurants, setListOfRestaurant] = useState([]);
 
-  const [filteredRestaurant, setFilteredRestaurant ] = useState([]);
+  const { listOfRestaurants, filteredRestaurant, searchText, fetchData } = useBody();
 
-  const [searchText, setSearchText] = useState("");
+  const onlineStatus = useOnlineStatus();
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   fetchData();
+  // }, []); // Fetch data on component mount
 
-  const fetchData = async () => {
-    const data = await fetch(
-      "https://www.swiggy.com/dapi/restaurants/list/v5?lat=28.7040592&lng=77.10249019999999&is-seo-homepage-enabled=true&page_type=DESKTOP_WEB_LISTING"
-    );
-
-    const json = await data.json();
-
-    console.log(json);
-
-    // Optional Chaning
-    setListOfRestaurant(
-      json?.data?.cards[2]?.card?.card?.gridElements?.infoWithStyle?.restaurants
-    );
-    setFilteredRestaurant(
-      json?.data?.cards[2]?.card?.card?.gridElements?.infoWithStyle?.restaurants
-    );
-  };
-
-  
+  if (!onlineStatus) {
+    return <h1>Looks like you're offline! Please check your internet connection.</h1>;
+  }
 
   return listOfRestaurants.length === 0 ? (
     <Shimmer />
@@ -50,13 +34,15 @@ const Body = () => {
             }}
           />
           <button
-           onClick={()=>{
-            const filteredRestaurant = listOfRestaurants.filter(
-              (res)=> res.info.name.toLowerCase().includes(searchText.toLowerCase()) 
+            onClick={() => {
+              const filteredRestaurant = listOfRestaurants.filter((res) =>
+                res.info.name.toLowerCase().includes(searchText.toLowerCase())
               );
-            setFilteredRestaurant(filteredRestaurant);
-           }}
-           >Search</button>
+              setFilteredRestaurant(filteredRestaurant);
+            }}
+          >
+            Search
+          </button>
         </div>
         <button
           className="filter-btn"
@@ -72,7 +58,12 @@ const Body = () => {
       </div>
       <div className="res-conatiner">
         {filteredRestaurant.map((restaurant) => (
-          <Link key={restaurant.info.id} to={"/restaurant/"+ restaurant.info.id}><RestaurantCard key={restaurant.info.id} resData={restaurant} /> </Link>
+          <Link
+            key={restaurant.info.id}
+            to={"/restaurant/" + restaurant.info.id}
+          >
+            <RestaurantCard key={restaurant.info.id} resData={restaurant} />{" "}
+          </Link>
         ))}
       </div>
     </div>
